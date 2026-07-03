@@ -286,6 +286,21 @@ img { max-width: 100%; }
 
   strong { color: $text; }
 
+  // Screenshots render as moderate-sized thumbnails, not edge-to-edge —
+  // click one to see it full size in the lightbox (assets/js/image-zoom.js).
+  img {
+    display: block;
+    max-width: min(100%, 30rem);
+    margin: 0 auto 1.5rem;
+    border: 1px solid $hairline;
+    border-radius: $radius;
+    cursor: zoom-in;
+    transition: border-color 0.15s ease;
+
+    &:hover { border-color: $accent; }
+    &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
+  }
+
   // Analyst-note callout
   blockquote {
     margin: 1.75rem 0;
@@ -491,4 +506,59 @@ img { max-width: 100%; }
 
   a { color: $text-faint; border-color: transparent; }
   a:hover { color: $text-muted; }
+}
+
+// ---------------------------------------------------------------------------
+// Image lightbox — click a writeup screenshot to see it full size.
+// ---------------------------------------------------------------------------
+html.lightbox-open {
+  overflow: hidden;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: rgba(6, 8, 12, 0.9);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.lightbox--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox__image {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: $radius;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid $hairline;
+  background: $panel-raised;
+  color: $text;
+  font-family: $sans;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover { color: $accent; border-color: $accent; }
+  &:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
 }
