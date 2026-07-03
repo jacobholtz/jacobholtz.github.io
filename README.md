@@ -9,7 +9,6 @@ Add a file to `_posts/` named `YYYY-MM-DD-a-short-title.md`:
 ```yaml
 ---
 title: "Your writeup title"
-tlp: amber      # clear | green | amber | red — defaults to clear
 tags: [actor-name, malware-family, t1055]
 ---
 

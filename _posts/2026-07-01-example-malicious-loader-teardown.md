@@ -1,6 +1,5 @@
 ---
 title: "Example: tearing down a fictional loader"
-tlp: amber
 tags: [example, loader, t1055, t1027]
 ---
 

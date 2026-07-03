@@ -14,12 +14,6 @@ $accent:      #52b8b0;
 $accent-dim:  #326d69;
 $amber:       #d99a4e;
 
-// Real Traffic Light Protocol classification colors (the signature element).
-$tlp-red:    #cc0000;
-$tlp-amber:  #ffc000;
-$tlp-green:  #33ff00;
-$tlp-clear:  #ffffff;
-
 $serif: 'Fraunces', Georgia, serif;
 $sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 $mono:  'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
@@ -224,81 +218,6 @@ img { max-width: 100%; }
 }
 
 // ---------------------------------------------------------------------------
-// TLP classification bar — the signature element.
-// Real Traffic Light Protocol markings, used verbatim on every writeup.
-// ---------------------------------------------------------------------------
-.tlp-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: $mono;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  padding: 0.5rem 0.9rem;
-  border-radius: $radius;
-  margin-bottom: 1.75rem;
-  width: fit-content;
-
-  &::before {
-    content: "";
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 50%;
-    display: inline-block;
-  }
-}
-
-.tlp-bar--red {
-  color: $tlp-red;
-  background: rgba($tlp-red, 0.1);
-  border: 1px solid rgba($tlp-red, 0.4);
-  &::before { background: $tlp-red; }
-}
-
-.tlp-bar--amber {
-  color: $tlp-amber;
-  background: rgba($tlp-amber, 0.1);
-  border: 1px solid rgba($tlp-amber, 0.4);
-  &::before { background: $tlp-amber; }
-}
-
-.tlp-bar--green {
-  color: $tlp-green;
-  background: rgba($tlp-green, 0.08);
-  border: 1px solid rgba($tlp-green, 0.35);
-  &::before { background: $tlp-green; }
-}
-
-.tlp-bar--clear {
-  color: $text-muted;
-  background: $panel;
-  border: 1px solid $hairline;
-  &::before { background: $tlp-clear; }
-}
-
-// Compact inline variant used in index-list meta rows.
-.tlp-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-weight: 600;
-
-  &::before {
-    content: "";
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 50%;
-    display: inline-block;
-  }
-}
-
-.tlp-chip--red    { color: $tlp-red;    &::before { background: $tlp-red; } }
-.tlp-chip--amber  { color: $tlp-amber;  &::before { background: $tlp-amber; } }
-.tlp-chip--green  { color: $tlp-green;  &::before { background: $tlp-green; } }
-.tlp-chip--clear  { color: $text-faint; &::before { background: $tlp-clear; } }
-
-// ---------------------------------------------------------------------------
 // Post
 // ---------------------------------------------------------------------------
 .post-header {
@@ -419,7 +338,7 @@ img { max-width: 100%; }
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 0 0 1.75rem;
+    margin: 0;
     font-family: $mono;
     font-size: 0.83rem;
 
@@ -446,6 +365,52 @@ img { max-width: 100%; }
     border-top: 1px solid $hairline;
     margin: 2.5rem 0;
   }
+}
+
+// Wraps every table rendered inside a writeup so a copy button can be
+// pinned to its corner without disturbing the table's own layout.
+.table-wrap {
+  position: relative;
+  margin: 0 0 1.75rem;
+}
+
+.table-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid $hairline;
+  border-radius: $radius;
+  background: $panel-raised;
+  color: $text-muted;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  svg { width: 0.9rem; height: 0.9rem; }
+
+  &:hover { color: $accent; border-color: $accent; }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
+.table-wrap:hover .table-copy-btn,
+.table-wrap:focus-within .table-copy-btn {
+  opacity: 1;
+}
+
+.table-copy-btn--copied {
+  color: $accent;
+  border-color: $accent;
 }
 
 .post-footer {

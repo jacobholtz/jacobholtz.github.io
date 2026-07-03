@@ -10,9 +10,6 @@ author:
   name: Jacob Holtz
   github: jacobholtz
 
-# Default classification applied to a post if it doesn't set `tlp:` itself.
-default_tlp: clear
-
 markdown: kramdown
 highlighter: rouge
 permalink: /writeups/:year/:month/:day/:title/

@@ -1,6 +1,5 @@
 ---
 title: "Welcome to the blog"
-tlp: clear
 tags: [meta]
 ---
 
@@ -18,20 +17,19 @@ front matter like this:
 ```yaml
 ---
 title: "Your writeup title"
-tlp: amber      # clear | green | amber | red
 tags: [lockbit, ransomware, t1486]
 ---
 ```
 
-- **`tlp`** controls the classification bar at the top of the post. It
-  defaults to `clear` (site-wide default in `_config.yml`) if you omit it.
-- **`tags`** show as chips under the title and get indexed automatically
-  on the [tags page]({{ '/tags/' | relative_url }}) — use them for threat
-  actors, malware families, and ATT&CK technique IDs.
+**`tags`** show as chips under the title and get indexed automatically
+on the [tags page]({{ '/tags/' | relative_url }}) — use them for threat
+actors, malware families, and ATT&CK technique IDs.
 
 ## What renders well
 
-Code blocks, IOC tables, and blockquotes all have dedicated styling:
+Code blocks, IOC tables, and blockquotes all have dedicated styling. Hover
+over a table to reveal a copy button — it copies the table as tab-separated
+values, so it pastes cleanly into a spreadsheet:
 
 ```python
 def is_suspicious(pe):

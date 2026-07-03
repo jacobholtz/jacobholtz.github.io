@@ -13,8 +13,6 @@ layout: default
   {% for post in posts %}
   <li class="index-item">
     <div class="index-item__meta">
-      {% assign level = post.tlp | default: site.default_tlp %}
-      <span class="tlp-chip tlp-chip--{{ level }}">TLP:{{ level | upcase }}</span>
       <span>{{ post.date | date: "%Y-%m-%d" }}</span>
       <span>{{ post.content | number_of_words | divided_by: 200 | at_least: 1 }} min read</span>
     </div>
