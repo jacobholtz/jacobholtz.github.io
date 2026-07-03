@@ -1,0 +1,35 @@
+---
+layout: default
+---
+<section class="hero">
+  <span class="hero__eyebrow">threat intelligence // field notes</span>
+  <h1 class="hero__title">{{ site.title }}</h1>
+  <p class="hero__lede">{{ site.description }}</p>
+</section>
+
+{% assign posts = site.posts %}
+{% if posts.size > 0 %}
+<ul class="index-list">
+  {% for post in posts %}
+  <li class="index-item">
+    <div class="index-item__meta">
+      {% assign level = post.tlp | default: site.default_tlp %}
+      <span class="tlp-chip tlp-chip--{{ level }}">TLP:{{ level | upcase }}</span>
+      <span>{{ post.date | date: "%Y-%m-%d" }}</span>
+      <span>{{ post.content | number_of_words | divided_by: 200 | at_least: 1 }} min read</span>
+    </div>
+    <h2 class="index-item__title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+    <p class="index-item__excerpt">{{ post.excerpt | strip_html | truncatewords: 32 }}</p>
+    {% if post.tags.size > 0 %}
+    <ul class="tags">
+      {% for tag in post.tags %}
+      <li><a class="tag" href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">#{{ tag }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty-state">No writeups filed yet. Drop a markdown file in <code>_posts/</code> to publish your first one.</p>
+{% endif %}

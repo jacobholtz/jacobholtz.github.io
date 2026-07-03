@@ -1,0 +1,6 @@
+{% comment %}
+  Renders the Traffic Light Protocol classification for a writeup.
+  Usage: {% include tlp-bar.html level=page.tlp %}
+{% endcomment %}
+{% assign level = include.level | default: site.default_tlp | downcase %}
+<div class="tlp-bar tlp-bar--{{ level }}">TLP:{{ level | upcase }}</div>

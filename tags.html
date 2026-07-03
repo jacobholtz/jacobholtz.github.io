@@ -1,0 +1,37 @@
+---
+layout: default
+title: Tags
+permalink: /tags/
+---
+<header class="page-header">
+  <h1 class="page-header__title">Tags</h1>
+</header>
+
+{% assign all_tags = "" | split: "" %}
+{% for post in site.posts %}
+  {% for tag in post.tags %}
+    {% unless all_tags contains tag %}
+      {% assign all_tags = all_tags | push: tag %}
+    {% endunless %}
+  {% endfor %}
+{% endfor %}
+{% assign all_tags = all_tags | sort %}
+
+<div class="tag-index">
+  {% if all_tags.size > 0 %}
+    {% for tag in all_tags %}
+    <div class="tag-index__group" id="{{ tag | slugify }}">
+      <h2 class="tag-index__name">#{{ tag }}</h2>
+      <ul class="tag-index__posts">
+        {% for post in site.posts %}
+          {% if post.tags contains tag %}
+          <li><span class="date">{{ post.date | date: "%Y-%m-%d" }}</span><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty-state">No tags yet — add a <code>tags:</code> list to a post's front matter to see it indexed here.</p>
+  {% endif %}
+</div>

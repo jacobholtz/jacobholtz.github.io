@@ -1,0 +1,45 @@
+title: Jacob Holtz
+tagline: Cyber threat intelligence — writeups, malware analysis, actor tracking.
+description: >-
+  Threat intelligence writeups covering malware analysis, actor tracking,
+  and adversary tradecraft mapped to MITRE ATT&CK.
+url: "https://jacobholtz.github.io"
+baseurl: ""
+
+author:
+  name: Jacob Holtz
+  github: jacobholtz
+
+# Default classification applied to a post if it doesn't set `tlp:` itself.
+default_tlp: clear
+
+markdown: kramdown
+highlighter: rouge
+permalink: /writeups/:year/:month/:day/:title/
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules

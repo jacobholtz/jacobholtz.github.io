@@ -1,0 +1,529 @@
+---
+---
+// ---------------------------------------------------------------------------
+// Tokens
+// ---------------------------------------------------------------------------
+$bg:          #0b0e13;
+$panel:       #131822;
+$panel-raised:#171d29;
+$hairline:    #232a37;
+$text:        #e4e9f0;
+$text-muted:  #8592a6;
+$text-faint:  #4d5766;
+$accent:      #52b8b0;
+$accent-dim:  #326d69;
+$amber:       #d99a4e;
+
+// Real Traffic Light Protocol classification colors (the signature element).
+$tlp-red:    #cc0000;
+$tlp-amber:  #ffc000;
+$tlp-green:  #33ff00;
+$tlp-clear:  #ffffff;
+
+$serif: 'Fraunces', Georgia, serif;
+$sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+$mono:  'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+$measure: 42rem;
+$radius: 3px;
+
+// ---------------------------------------------------------------------------
+// Reset / base
+// ---------------------------------------------------------------------------
+* { box-sizing: border-box; }
+
+html {
+  background: $bg;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: $bg;
+  color: $text;
+  font-family: $sans;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: $accent;
+  text-decoration: none;
+  border-bottom: 1px solid rgba($accent, 0.35);
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover { border-color: $accent; }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+img { max-width: 100%; }
+
+::selection { background: $accent-dim; color: $text; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+// ---------------------------------------------------------------------------
+// Layout shell
+// ---------------------------------------------------------------------------
+.wrap {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+// ---------------------------------------------------------------------------
+// Header — terminal-prompt wordmark, quiet nav
+// ---------------------------------------------------------------------------
+.site-header {
+  border-bottom: 1px solid $hairline;
+  padding: 1.35rem 0;
+}
+
+.site-header__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.site-header__brand {
+  font-family: $mono;
+  font-size: 0.95rem;
+  color: $text;
+  border-bottom: none;
+  white-space: nowrap;
+
+  .cursor {
+    color: $accent;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  &:hover .cursor { animation-play-state: paused; }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.site-header__nav {
+  display: flex;
+  gap: 1.25rem;
+  font-family: $mono;
+  font-size: 0.85rem;
+
+  a {
+    color: $text-muted;
+    border-bottom: 1px solid transparent;
+
+    &:hover { color: $text; border-color: $hairline; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hero (home page)
+// ---------------------------------------------------------------------------
+.hero {
+  padding: 3.5rem 0 2.75rem;
+  border-bottom: 1px solid $hairline;
+}
+
+.hero__eyebrow {
+  font-family: $mono;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $accent;
+  display: block;
+  margin-bottom: 0.9rem;
+}
+
+.hero__title {
+  font-family: $serif;
+  font-weight: 600;
+  font-size: clamp(2.1rem, 5vw, 3rem);
+  line-height: 1.08;
+  margin: 0 0 0.85rem;
+  color: $text;
+  letter-spacing: -0.01em;
+}
+
+.hero__lede {
+  font-size: 1.08rem;
+  color: $text-muted;
+  max-width: 34rem;
+  margin: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Writeup index (home list)
+// ---------------------------------------------------------------------------
+.index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.index-item {
+  padding: 2rem 0;
+  border-bottom: 1px solid $hairline;
+
+  &:last-child { border-bottom: none; }
+}
+
+.index-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: $mono;
+  font-size: 0.78rem;
+  color: $text-faint;
+  margin-bottom: 0.6rem;
+}
+
+.index-item__title {
+  font-family: $serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  line-height: 1.25;
+
+  a {
+    color: $text;
+    border-bottom: 1px solid transparent;
+    &:hover { color: $accent; border-color: rgba($accent, 0.35); }
+  }
+}
+
+.index-item__excerpt {
+  color: $text-muted;
+  margin: 0 0 0.8rem;
+  max-width: $measure;
+}
+
+.empty-state {
+  padding: 2.5rem 0;
+  color: $text-muted;
+  font-family: $mono;
+  font-size: 0.9rem;
+
+  code {
+    background: $panel;
+    padding: 0.15rem 0.4rem;
+    border-radius: $radius;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// TLP classification bar — the signature element.
+// Real Traffic Light Protocol markings, used verbatim on every writeup.
+// ---------------------------------------------------------------------------
+.tlp-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: $mono;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.5rem 0.9rem;
+  border-radius: $radius;
+  margin-bottom: 1.75rem;
+  width: fit-content;
+
+  &::before {
+    content: "";
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+.tlp-bar--red {
+  color: $tlp-red;
+  background: rgba($tlp-red, 0.1);
+  border: 1px solid rgba($tlp-red, 0.4);
+  &::before { background: $tlp-red; }
+}
+
+.tlp-bar--amber {
+  color: $tlp-amber;
+  background: rgba($tlp-amber, 0.1);
+  border: 1px solid rgba($tlp-amber, 0.4);
+  &::before { background: $tlp-amber; }
+}
+
+.tlp-bar--green {
+  color: $tlp-green;
+  background: rgba($tlp-green, 0.08);
+  border: 1px solid rgba($tlp-green, 0.35);
+  &::before { background: $tlp-green; }
+}
+
+.tlp-bar--clear {
+  color: $text-muted;
+  background: $panel;
+  border: 1px solid $hairline;
+  &::before { background: $tlp-clear; }
+}
+
+// Compact inline variant used in index-list meta rows.
+.tlp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+
+  &::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+.tlp-chip--red    { color: $tlp-red;    &::before { background: $tlp-red; } }
+.tlp-chip--amber  { color: $tlp-amber;  &::before { background: $tlp-amber; } }
+.tlp-chip--green  { color: $tlp-green;  &::before { background: $tlp-green; } }
+.tlp-chip--clear  { color: $text-faint; &::before { background: $tlp-clear; } }
+
+// ---------------------------------------------------------------------------
+// Post
+// ---------------------------------------------------------------------------
+.post-header {
+  padding: 3rem 0 0;
+}
+
+.post-header__title {
+  font-family: $serif;
+  font-weight: 600;
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  line-height: 1.15;
+  margin: 0 0 0.9rem;
+  letter-spacing: -0.01em;
+}
+
+.post-header__meta {
+  font-family: $mono;
+  font-size: 0.8rem;
+  color: $text-faint;
+  margin-bottom: 1rem;
+
+  span + span::before { content: " · "; }
+}
+
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 0 2.25rem;
+}
+
+.tag {
+  font-family: $mono;
+  font-size: 0.76rem;
+  color: $accent;
+  background: rgba($accent, 0.08);
+  border: 1px solid rgba($accent, 0.3);
+  border-radius: $radius;
+  padding: 0.2rem 0.55rem;
+  border-bottom: 1px solid rgba($accent, 0.3);
+
+  &:hover { background: rgba($accent, 0.16); border-color: $accent; }
+}
+
+.post-content {
+  padding: 0.5rem 0 3.5rem;
+  max-width: $measure;
+
+  h2, h3, h4 {
+    font-family: $serif;
+    font-weight: 600;
+    color: $text;
+    margin: 2.2rem 0 0.8rem;
+    line-height: 1.3;
+  }
+
+  h2 { font-size: 1.55rem; }
+  h3 { font-size: 1.25rem; }
+
+  p { margin: 0 0 1.2rem; }
+
+  ul, ol { margin: 0 0 1.2rem; padding-left: 1.3rem; }
+  li { margin-bottom: 0.4rem; }
+
+  strong { color: $text; }
+
+  // Analyst-note callout
+  blockquote {
+    margin: 1.75rem 0;
+    padding: 0.9rem 1.1rem;
+    border-left: 3px solid $amber;
+    background: $panel;
+    border-radius: 0 $radius $radius 0;
+    color: $text-muted;
+
+    p:last-child { margin-bottom: 0; }
+
+    p:first-child::before {
+      content: "ANALYST NOTE";
+      display: block;
+      font-family: $mono;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: $amber;
+      margin-bottom: 0.45rem;
+    }
+  }
+
+  code {
+    font-family: $mono;
+    font-size: 0.87em;
+    background: $panel;
+    padding: 0.15rem 0.35rem;
+    border-radius: $radius;
+    color: $accent;
+  }
+
+  pre {
+    background: $panel-raised;
+    border: 1px solid $hairline;
+    border-radius: $radius;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    margin: 0 0 1.5rem;
+
+    code {
+      background: none;
+      padding: 0;
+      color: $text;
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+  }
+
+  // IOC / indicator tables
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 1.75rem;
+    font-family: $mono;
+    font-size: 0.83rem;
+
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid $hairline;
+    }
+
+    th {
+      color: $text-faint;
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+
+    td { color: $text-muted; }
+    tr:hover td { color: $text; }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid $hairline;
+    margin: 2.5rem 0;
+  }
+}
+
+.post-footer {
+  padding-bottom: 4rem;
+  border-top: 1px solid $hairline;
+  padding-top: 1.75rem;
+
+  a {
+    font-family: $mono;
+    font-size: 0.85rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Static pages (about, tags index)
+// ---------------------------------------------------------------------------
+.page-header {
+  padding: 3rem 0 0.5rem;
+}
+
+.page-header__title {
+  font-family: $serif;
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4vw, 2.3rem);
+  margin: 0;
+}
+
+.page-content {
+  padding: 1rem 0 4rem;
+  max-width: $measure;
+  color: $text-muted;
+
+  a { color: $accent; }
+}
+
+.tag-index {
+  padding: 1rem 0 4rem;
+}
+
+.tag-index__group {
+  margin-bottom: 2.25rem;
+}
+
+.tag-index__name {
+  font-family: $mono;
+  color: $accent;
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.tag-index__posts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li { margin-bottom: 0.4rem; }
+
+  a { color: $text-muted; border-bottom: 1px solid transparent; }
+  a:hover { color: $text; border-color: $hairline; }
+
+  .date {
+    font-family: $mono;
+    font-size: 0.76rem;
+    color: $text-faint;
+    margin-right: 0.5rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Footer
+// ---------------------------------------------------------------------------
+.site-footer {
+  border-top: 1px solid $hairline;
+  padding: 1.75rem 0 3rem;
+  font-family: $mono;
+  font-size: 0.78rem;
+  color: $text-faint;
+
+  a { color: $text-faint; border-color: transparent; }
+  a:hover { color: $text-muted; }
+}

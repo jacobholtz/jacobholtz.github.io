@@ -1,0 +1,28 @@
+---
+layout: default
+---
+<article>
+  <header class="post-header">
+    {% include tlp-bar.html level=page.tlp %}
+    <h1 class="post-header__title">{{ page.title }}</h1>
+    <div class="post-header__meta">
+      <span>FILED {{ page.date | date: "%Y-%m-%d" }}</span>
+      <span>{{ content | number_of_words | divided_by: 200 | at_least: 1 }} min read</span>
+    </div>
+    {% if page.tags.size > 0 %}
+    <ul class="tags">
+      {% for tag in page.tags %}
+      <li><a class="tag" href="{{ '/tags/' | relative_url }}#{{ tag | slugify }}">#{{ tag }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </header>
+
+  <div class="post-content">
+    {{ content }}
+  </div>
+
+  <footer class="post-footer">
+    <a href="{{ '/' | relative_url }}">&larr; all writeups</a>
+  </footer>
+</article>
