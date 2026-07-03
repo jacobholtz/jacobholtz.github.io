@@ -4,7 +4,7 @@ tags: [remcos, javascript]
 ---
 
 Sample retrieved 5/12/2026 at 7:28PM CST from [MalwareBazaar](https://bazaar.abuse.ch/sample/89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba/)
-Full disclosure: I used Claude to help with deobfuscation and explaining concepts I was not familiar with. 
+\nFull disclosure: I used Claude to help with deobfuscation and explaining concepts I was not familiar with. 
 
 >Remcos is a commercially sold Windows remote access tool (RAT) marketed as legitimate remote-administration software but widely abused by threat actors for malicious remote control, keystroke/credential harvesting, and surveillance. It's commonly delivered via phishing (often as an obfuscated script or macro-laden document), and once installed it typically establishes persistence and beacons out to a C2 server over a custom protocol.
 
