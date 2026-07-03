@@ -129,7 +129,7 @@ Thanks for reading!
 | ------ | ---------------------------------------------------------------- | ------------------------------------------ |
 | SHA256 | 89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba | Original sample from MalwareBazaar         |
 | SHA256 | F95D799399A156215867E534D0B600A3851B255D697C54E5AD4BCC47A41AC842 | Remcos payload extracted from colorcpl.exe |
-| IP     | 103.83[.]87.8:1515                                               | Remcos C2                                  | Domain | newsletter[.]moreiraclear[.]com				    | Share infrastructure artifact
+| IP     | 103.83[.]87.8:1515                                               | Remcos C2 |                                 | Domain | newsletter[.]moreiraclear[.]com				    | Shared infrastructure artifact
 
 ### MITRE ATT&CK v19 Mapping
 
