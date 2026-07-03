@@ -7,9 +7,11 @@ tags: [remcos, javascript]
 Sample retrieved 5/12/2026 at 7:28PM CST from [MalwareBazaar](https://bazaar.abuse.ch/sample/89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba/)
 SHA256: 89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba
 Filetype: JavaScript (.js)
-
-### Introduction
 Full disclosure: I used Claude to help with deobfuscation and explaining concepts I was not familiar with. 
+
+>Remcos is a commercially sold Windows remote access tool (RAT) marketed as legitimate remote-administration software but widely abused by threat actors for malicious remote control, keystroke/credential harvesting, and surveillance. It's commonly delivered via phishing (often as an obfuscated script or macro-laden document), and once installed it typically establishes persistence via registry Run keys and beacons out to a C2 server over a custom protocol — exactly the pattern in your writeup, where it was injected into colorcpl.exe and phoned home over port 1515.
+
+
 stuff about remcos here
 ### Deobfuscation and Static Analysis
 Upon unzipping the file archive and opening the JavaScript payload in a text editor, we are greeted with what appears to be many lines of gibberish text:
