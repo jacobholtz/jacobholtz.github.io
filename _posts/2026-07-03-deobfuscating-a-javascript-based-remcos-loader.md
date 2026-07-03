@@ -36,7 +36,7 @@ After extracting the additional text to its own file, passing it through `webcra
 After some more deobfuscation, we finally have human-readable text:
 ![Pasted image 20260515151713](/assets/images/deobfuscating-a-javascript-based-remcos-loader/06.png)
 
-In short, the script checks if the `FHOTDMJCRUDYVZRBEEQCCPVSJ` file already exists, creating it not. If the `LOUUU...` variable at the top is set to `YESSSSSSSS`, a scheduled task executing `FHOTDMJCRUDYVZRBEEQCCPVSJ` every 15 minutes is created. In this case, however, that functionality is not reached. Furthermore, the `makeid` function accepts an integer and generates a random string consisting of the number of characters specified in the passed integer. For example, if `makeid(15)` is called, the output string could be `mUalbIWhxyyjSpk`.
+In short, the script checks if the `FHOTDMJCRUDYVZRBEEQCCPVSJ` file already exists, creating it if not. If the `LOUUU...` variable at the top is set to `YESSSSSSSS`, a scheduled task executing `FHOTDMJCRUDYVZRBEEQCCPVSJ` every 15 minutes is created. In this case, however, that functionality is not reached. Furthermore, the `makeid` function accepts an integer and generates a random string consisting of the number of characters specified in the passed integer. For example, if `makeid(15)` is called, the output string could be `mUalbIWhxyyjSpk`.
 
 Next, three XML ActiveX objects are created to write base64-decoded content to a file with no extension, an EXE, and a TTF:
 ![Pasted image 20260517204124](/assets/images/deobfuscating-a-javascript-based-remcos-loader/07.png)
@@ -85,7 +85,7 @@ Line eight closes the thread handle since only the process thread is needed for 
 
 Lines nine through twelve open the previously dropped `FHOTDMJCRUDYVZRBEEQCCPVSJ` payload, reads the byte count of its contents, and closes the opened file object. An additional check ensures contents actually exist, exiting if not.
 
-The rest of the script (lines 14-35) stages a `DllStruct`  with enough space to XOR-decrypt `FHOTDMJCRUDYVZRBEEQCCPVSJ`  in-place with a key of `0x381EFC`. Interestingly, encrypted bytes are effectively XOR-decrypted using a key of `0xFC` the `DllStructSetData` call will truncate any XOR output to a single byte since only one byte is iterated over at a time. 
+The rest of the script (lines 14-35) stages a `DllStruct`  with enough space to XOR-decrypt `FHOTDMJCRUDYVZRBEEQCCPVSJ`  in-place with a key of `0x381EFC`. Interestingly, encrypted bytes are effectively XOR-decrypted using a key of `0xFC` since the `DllStructSetData` call will truncate any XOR output to a single byte since only one byte is iterated over at a time. 
 
 <img src="/assets/images/deobfuscating-a-javascript-based-remcos-loader/15.png" alt="Pasted image 20260529194218" width="697">
 
@@ -103,13 +103,13 @@ Remcos is also known to harvest credentials and keystrokes. This behavior was di
 
 ![Pasted image 20260614165921](/assets/images/deobfuscating-a-javascript-based-remcos-loader/18.png)
 
-Investigating the single IP address in Censys reveals a number of interesting findings: 1), port 1515 is still open and listening for Remcos connections far longer than what is typically observed from C2 servers, 2) the default remote desktop protocol (RDP) port 3389 appears to be in use, meaning anyone from the internet can potentially access a remote desktop session on this host, 3), the WHOIS organization address points to Wyoming in the US despite IP geolocation resolving to Instanbul, Turkey, and 4), a single forward DNS entry containing newsletter[.]moreiraclear[.]com can be observed. 
+Investigating the single IP address in Censys reveals a number of interesting findings: 1), port 1515 is still open and listening for Remcos connections, 2), the default remote desktop protocol (RDP) port 3389 appears to be in use and exposed to the internet, 3), the WHOIS organization address points to Wyoming in the US despite IP geolocation resolving to Istanbul, Turkey, and 4), a single forward DNS entry containing newsletter[.]moreiraclear[.]com can be observed. 
 
 ![Pasted image 20260531204504](/assets/images/deobfuscating-a-javascript-based-remcos-loader/19.png)
 
 ![Pasted image 20260607200948](/assets/images/deobfuscating-a-javascript-based-remcos-loader/20.png)
 
-A quick search led me to White Label Services, LLC is a hosting provider that adopts a white label approach characterized by offering a service or product to be rebranded by another company. In this case, White Label Services' infrastructure is leased to third parties, including VPNs, web proxies, or other hosting providers. This type of service, while typically legitimate, is frequently abused by cybercrime syndicates to redirect blame and avoid suspicion. White-label hosting providers in areas with lax cybercrime laws (like Turkey) often do not respond to takedown requests, implement no or loosely-defined know-your-customer (KYC) policies, accept anonymous cryptocurrency payments, and implement multiple layers of upstream IP routing. These compounding factors greatly limit law enforcement's ability to interrupt malicious campaigns using these services for infrastructure, so much so they are described as "bulletproof hosters" among underground rings and the intelligence community alike.  
+A quick search led me to White Label Services, LLC, a hosting provider that adopts a white label approach characterized by offering a service or product to be rebranded by another company. In this case, White Label Services' infrastructure is leased to third parties, including VPNs, web proxies, or other hosting providers. This type of service, while typically legitimate, is frequently abused by cybercrime syndicates to redirect blame and avoid suspicion. White-label hosting providers in areas with lax cybercrime laws (like Turkey) often do not respond to takedown requests, implement no or loosely-defined know-your-customer (KYC) policies, accept anonymous cryptocurrency payments, and implement multiple layers of upstream IP routing. These compounding factors greatly limit law enforcement's ability to interrupt malicious campaigns using these services for infrastructure, so much so they are described as "bulletproof hosters" among underground rings and the intelligence community alike.  
 
 ![Pasted image 20260531210750](/assets/images/deobfuscating-a-javascript-based-remcos-loader/21.png)
 
@@ -129,18 +129,17 @@ Thanks for reading!
 | ------ | ---------------------------------------------------------------- | ------------------------------------------ |
 | SHA256 | 89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba | Original sample from MalwareBazaar         |
 | SHA256 | F95D799399A156215867E534D0B600A3851B255D697C54E5AD4BCC47A41AC842 | Remcos payload extracted from colorcpl.exe |
-| IP     | 103.83[.]87.8:1515                                               | Remcos C2                                  |
+| IP     | 103.83[.]87.8:1515                                               | Remcos C2                                  | Domain | newsletter[.]moreiraclear[.]com				    | Share infrastructure artifact
 
 ### MITRE ATT&CK v19 Mapping
 
 | **Tactic**          | **Technique**                                                                     | **Evidence**                                                      |
 | ------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Execution           | T124.002 - User Execution: Malicious File                                         | Initial JavaScript payload executed by user for initial infection |
+| Execution           | T1024.002 - User Execution: Malicious File                                         | Initial JavaScript payload executed by user for initial infection |
 | Execution           | T1059.007 - Command and Scripting Interpreter: JavaScript                         | Multiple JavaScript payloads                                      |
 | Stealth             | T1027.009 - Obfuscated Files or Information: Embedded Payloads                    | XOR-encrypted Remcos payloads embedded in files                   |
 | Stealth             | T1027.010 - Obfuscated Files or Information: Command Obfuscation                  | Obfuscated AutoIt3 script and process calls                       |
 | Stealth             | T1027.013 - Obfuscated Files or Information: Encrypted/Encoded File               | Multiple layers of encoded JavaScript and PE payloads             |
-| Stealth             | T1218 - System Binary Proxy Execution                                             | colorcpl.exe is targeted as an injection host                     |
-| Stealth             | T1055.002 - Process Injection: Portable Executable Injection                      | Remcos payload injected into colorcpl.exe                         |
+| Stealth             | T1055 - Process Injection                      | Remcos payload injected into colorcpl.exe                         |
 | Persistence         | T1547.001 - Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder | Registry Run key targeted for Remcos persistence on boot          |
 | Command and Control | T1571 - Non-standard Port                                                         | Remcos communicates with remote C2 via TCP port 1515              |
