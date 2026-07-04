@@ -3,7 +3,7 @@
 
 Usage:
     scripts/publish.py "/path/to/vault/Writeups/My Post/My Post.md"
-    scripts/publish.py "<note>" --date 04-07-2026 --slug custom-slug
+    scripts/publish.py "<note>" --date 07/04/2026 --slug custom-slug
     scripts/publish.py "<note>" --dry-run
     scripts/publish.py "<note>" --commit
     scripts/publish.py "<note>" --commit --push
@@ -164,7 +164,7 @@ def main():
     parser.add_argument("note", type=Path, help="Path to the Obsidian note to publish")
     parser.add_argument("--vault", type=Path, default=DEFAULT_VAULT, help=f"Vault root, for locating images (default: {DEFAULT_VAULT})")
     parser.add_argument("--repo", type=Path, default=REPO_ROOT, help="Path to the jacobholtz.github.io repo")
-    parser.add_argument("--date", default=None, help="Publish date DD-MM-YYYY (default: today)")
+    parser.add_argument("--date", default=None, help="Publish date MM/DD/YYYY (default: today)")
     parser.add_argument("--slug", default=None, help="URL slug (default: derived from title)")
     parser.add_argument("--force", action="store_true", help="Overwrite an existing post at the destination path")
     parser.add_argument("--commit", action="store_true", help="git commit the new files after writing them")
@@ -192,15 +192,15 @@ def main():
 
     if args.date:
         try:
-            date_obj = datetime.datetime.strptime(args.date, "%d-%m-%Y").date()
+            date_obj = datetime.datetime.strptime(args.date, "%m/%d/%Y").date()
         except ValueError:
-            sys.exit(f"error: --date must be DD-MM-YYYY, got {args.date!r}")
+            sys.exit(f"error: --date must be MM/DD/YYYY, got {args.date!r}")
     else:
         date_obj = datetime.date.today()
 
     # Jekyll requires _posts files to be named YYYY-MM-DD-slug.md (year-first,
     # hard requirement of its own post parser) regardless of the site's
-    # day-month-year display convention used everywhere else.
+    # month-day-year display convention used everywhere else.
     date_str = date_obj.isoformat()
 
     slug = args.slug or slugify(title)
@@ -223,7 +223,7 @@ def main():
     final_content = frontmatter + "\n" + new_body.strip("\n") + "\n"
 
     print(f"Title:  {title}")
-    print(f"Date:   {date_obj.strftime('%d-%m-%Y')}")
+    print(f"Date:   {date_obj.strftime('%m/%d/%Y')}")
     print(f"Tags:   {', '.join(tags) or '(none)'}")
     print(f"Dest:   {dest_post.relative_to(repo_root)}")
     print(f"Images: {len(used_images)} to copy -> {image_dir.relative_to(repo_root)}/")

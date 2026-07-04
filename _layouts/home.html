@@ -12,7 +12,7 @@ layout: default
   {% for post in posts %}
   <li class="index-item">
     <div class="index-item__meta">
-      <span>{{ post.date | date: "%d-%m-%Y" }}</span>
+      <span>{{ post.date | date: "%m/%d/%Y" }}</span>
       <span>{{ post.content | number_of_words | divided_by: 200 | at_least: 1 }} min read</span>
     </div>
     <h2 class="index-item__title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>

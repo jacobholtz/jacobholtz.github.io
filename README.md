@@ -6,7 +6,7 @@ CTI writeup blog, built with Jekyll and served by GitHub Pages.
 
 Add a file to `_posts/` named `YYYY-MM-DD-a-short-title.md` (Jekyll's own
 post-parser requires the year-first filename regardless of the site's
-day-month-year display format used everywhere else):
+month-day-year display format used everywhere else):
 
 ```yaml
 ---
@@ -49,7 +49,7 @@ It handles:
   post layout already renders that as an H1, so a duplicate is dropped.
 
 Run `python3 scripts/publish.py --help` for all the flags (`--date`, `--slug`,
-`--vault`, `--repo`, `--force`). `--date` takes `DD-MM-YYYY`, matching the
+`--vault`, `--repo`, `--force`). `--date` takes `MM/DD/YYYY`, matching the
 dates shown on the site — the script converts it to the `YYYY-MM-DD` filename
 Jekyll requires internally.
 
