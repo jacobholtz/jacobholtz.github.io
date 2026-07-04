@@ -29,6 +29,11 @@ $radius: 3px;
 html {
   background: $bg;
   scroll-behavior: smooth;
+  // Prevent mobile Safari/Chrome from auto-inflating font size in narrow,
+  // non-wrapping columns (table cells full of long hashes, code blocks) —
+  // without this, "font-boosting" silently overrides our font sizes.
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
