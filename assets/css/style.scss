@@ -377,6 +377,11 @@ img { max-width: 100%; }
 .table-wrap {
   position: relative;
   margin: 0 0 1.75rem;
+  // Long unbreakable values (hashes, IOCs) can make the table wider than
+  // its column — scroll horizontally within the table itself instead of
+  // letting it blow out the page (and the mobile layout viewport with it).
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table-copy-btn {
@@ -411,6 +416,14 @@ img { max-width: 100%; }
 .table-wrap:hover .table-copy-btn,
 .table-wrap:focus-within .table-copy-btn {
   opacity: 1;
+}
+
+// Touch devices never fire :hover, so the copy button would otherwise be
+// undiscoverable there — just show it always.
+@media (hover: none) {
+  .table-copy-btn {
+    opacity: 1;
+  }
 }
 
 .table-copy-btn--copied {
