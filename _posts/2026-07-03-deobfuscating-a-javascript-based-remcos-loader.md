@@ -3,7 +3,7 @@ title: "Deobfuscating a JavaScript-based Remcos loader"
 tags: [remcos, javascript]
 ---
 
-Sample retrieved 5/12/2026 at 7:28PM CST from [MalwareBazaar](https://bazaar.abuse.ch/sample/89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba/)
+Sample retrieved 12/05/2026 at 7:28PM CST from [MalwareBazaar](https://bazaar.abuse.ch/sample/89bfece0fa4499eb58fe0e112ef212e32fab31f1d14432eba8eb30dce89d1aba/)
 
 Full disclosure: I used Claude to help with deobfuscation and explaining concepts I was not familiar with. 
 
