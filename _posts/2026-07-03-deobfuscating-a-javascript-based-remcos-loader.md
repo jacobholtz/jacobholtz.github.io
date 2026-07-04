@@ -34,21 +34,26 @@ After extracting the additional text to its own file, passing it through `webcra
 ![Pasted image 20260515125843](/assets/images/deobfuscating-a-javascript-based-remcos-loader/05.png)
 
 After some more deobfuscation, we finally have human-readable text:
+
 ![Pasted image 20260515151713](/assets/images/deobfuscating-a-javascript-based-remcos-loader/06.png)
 
 In short, the script checks if the `FHOTDMJCRUDYVZRBEEQCCPVSJ` file already exists, creating it if not. If the `LOUUU...` variable at the top is set to `YESSSSSSSS`, a scheduled task executing `FHOTDMJCRUDYVZRBEEQCCPVSJ` every 15 minutes is created. In this case, however, that functionality is not reached. Furthermore, the `makeid` function accepts an integer and generates a random string consisting of the number of characters specified in the passed integer. For example, if `makeid(15)` is called, the output string could be `mUalbIWhxyyjSpk`.
 
 Next, three XML ActiveX objects are created to write base64-decoded content to a file with no extension, an EXE, and a TTF:
+
 ![Pasted image 20260517204124](/assets/images/deobfuscating-a-javascript-based-remcos-loader/07.png)
 
 The EXE appears to be AutoIt3, a legitimate automation utility frequently abused by threat actors to execute malicious code:
+
 ![Pasted image 20260517205009](/assets/images/deobfuscating-a-javascript-based-remcos-loader/08.png)
 
 VirusTotal also recognizes this payload as AutoIt3:
+
 ![Pasted image 20260517205048](/assets/images/deobfuscating-a-javascript-based-remcos-loader/09.png)
 ![Pasted image 20260517205101](/assets/images/deobfuscating-a-javascript-based-remcos-loader/10.png)
 
 It is unclear why Scriptrunner.exe is included given I could not find anything calling the assigned variable, but I speculate it's a red herring meant to throw analysts off or a left-over artifact from development. The final two lines create a `WScript.Shell` object and calls the dropped EXE against the TTF.
+
 ![Pasted image 20260613112922](/assets/images/deobfuscating-a-javascript-based-remcos-loader/11.png)
 
 Deobfuscating the TTF file reveals it's an AutoIt3 script, consistent with our prior discovery of the AutoIt3 executable. Here's what the script looks like before/after deobfuscation and cleanup:
@@ -118,6 +123,7 @@ This specific IP address has substantial history of abuse. The first reported ca
 ![Pasted image 20260531211128](/assets/images/deobfuscating-a-javascript-based-remcos-loader/22.png)
 
 Uploading to [Malware Bazaar](https://bazaar.abuse.ch/sample/f95d799399a156215867e534d0b600a3851b255d697c54e5ad4bcc47a41ac842/) and [VirusTotal](https://www.virustotal.com/gui/file/f95d799399a156215867e534d0b600a3851b255d697c54e5ad4bcc47a41ac842/detection) confirms it's a Remcos payload, further validating my findings.
+
 ![Pasted image 20260531173048](/assets/images/deobfuscating-a-javascript-based-remcos-loader/23.png)
 
 ![Pasted image 20260531173337](/assets/images/deobfuscating-a-javascript-based-remcos-loader/24.png)
