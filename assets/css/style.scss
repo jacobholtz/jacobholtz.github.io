@@ -377,6 +377,88 @@ img { max-width: 100%; }
   }
 }
 
+// ---------------------------------------------------------------------------
+// Table of contents (assets/js/toc.js)
+//
+// Inline at the top of the post by default; pinned into the left margin once
+// the viewport is wide enough to hold it clear of the 46rem column. Entries
+// sit dim and lift to full-strength text as their section is scrolled past.
+// ---------------------------------------------------------------------------
+.post-content .post-toc {
+  margin: 0 0 2.5rem;
+  font-family: $sans;
+
+  .post-toc__title {
+    font-family: $mono;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $text-faint;
+    margin: 0 0 0.6rem;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  li { margin: 0; }
+
+  a {
+    display: block;
+    padding: 0.32rem 0.7rem;
+    border: none;
+    border-left: 2px solid $hairline;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: $text-faint;
+    transition: color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      color: $accent;
+      border-left-color: $accent-dim;
+    }
+
+    // Read-so-far. On this palette "lighter" is the highlight: the entry
+    // steps up from $text-faint to full $text with an accent rail.
+    &.is-current {
+      color: $text;
+      border-left-color: $accent;
+    }
+  }
+
+  // Depth is carried by indent and tone rather than a rail per level, so the
+  // single left edge stays clean.
+  ol ol > li > a {
+    padding-left: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  ol ol ol > li > a { padding-left: 2.3rem; }
+}
+
+// 46rem column + a rail and gutters on each side.
+@media (min-width: 1240px) {
+  .post-content .post-toc {
+    position: fixed;
+    top: 40px;
+    right: calc(50% + 25.5rem);
+    width: max-content;
+    max-width: min(15rem, calc(50% - 27rem));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    margin: 0;
+
+    a {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
 // Wraps every table rendered inside a writeup so a copy button can be
 // pinned to its corner without disturbing the table's own layout.
 .table-wrap {
