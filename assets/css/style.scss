@@ -453,6 +453,12 @@ img { max-width: 100%; }
 
     // Long titles wrap instead of truncating, so every entry reads in full.
     a { overflow-wrap: anywhere; }
+
+    // Subsections collapse until their branch holds the current section
+    // (toc.js sets .is-open). The inline TOC on narrow screens stays fully
+    // expanded, since it is read before scrolling.
+    ol ol { display: none; }
+    li.is-open > ol { display: block; }
   }
 }
 

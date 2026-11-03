@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
   content.insertBefore(toc, headings[0]);
 
   var links = toc.querySelectorAll('a');
+  var items = toc.querySelectorAll('li');
 
   // The active entry is the last heading to have crossed ACTIVE_LINE. Measured
   // live rather than cached, because images load late and shift the headings.
@@ -73,6 +74,13 @@ document.addEventListener('DOMContentLoaded', function () {
     currentIndex = active;
     links.forEach(function (link, i) {
       link.classList.toggle('is-current', i === active);
+    });
+
+    // Nested entries stay collapsed until the reader is inside that branch,
+    // so a long run of subsections doesn't crowd out the rest of the rail.
+    var activeLink = links[active];
+    items.forEach(function (item) {
+      item.classList.toggle('is-open', !!activeLink && item.contains(activeLink));
     });
   }
 
