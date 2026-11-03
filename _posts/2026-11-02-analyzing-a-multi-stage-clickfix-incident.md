@@ -9,6 +9,8 @@ BoundSiphon pilfers saved browser passwords, session cookies, cryptocurrency wal
 
 The operator behind the activity is unidentified. Blackpoint Cyber's Adversary Pursuit Group published an analysis of the same toolkit on September 23rd that names the infostealer BoundSiphon and the RAT RemotePanel ([RemotePanel and BoundSiphon: A Dual-Payload Toolkit for Persistent Access and Browser Theft](https://blackpointcyber.com/blog/remotepanel-and-boundsiphon-a-dual-payload-toolkit-for-persistent-access-and-browser-theft/)). The hashes, domains, finger query, service binary path, and blockchain contract in this writeup match that report, which confirms that the observed payloads are BoundSiphon and RemotePanel.
 
+### Stages 0 and 1: ClickFix command and finger retrieval
+
 Execution begins when the malicious copy-and-pasted command retrieves the first PowerShell stage with `finger.exe`.
 
 ![Stage 0 ClickFix command, obfuscated and deobfuscated, calling finger.exe](/assets/images/analyzing-a-multi-stage-clickfix-incident/01.png)
@@ -18,6 +20,8 @@ Execution begins when the malicious copy-and-pasted command retrieves the first 
 ![Stage 1 PowerShell command that sets amsiInitFailed and downloads main.go](/assets/images/analyzing-a-multi-stage-clickfix-incident/02.png)
 
 This payload attempts to bypass the Antimalware Scan Interface (AMSI) by setting the `amsiInitFailed` field to true before pulling and executing the next stage in memory with `IEX`.
+
+### Stage 2: CMSTPLUA UAC bypass
 
 The second stage is a PowerShell script disguised as a Go source file (`main.go`) under a `/googleads/` path on a Bunny CDN subdomain (`cdnprog[.]b-cdn[.]net`). It first checks whether the current process token has administrator rights before setting up privilege escalation through a CMSTPLUA COM object UAC bypass. This escalation doesn't turn a standard user into an administrator. Instead, it raises a member of the local Administrators group from the filtered, medium-integrity token that UAC assigns by default to the full, high-integrity token without showing a UAC prompt.
 
@@ -32,15 +36,21 @@ If the session is not already elevated, the third stage is then retrieved and ex
 
 ![Stage 2 logic that runs stage 3 through the UAC bypass and reads the elv_ output file](/assets/images/analyzing-a-multi-stage-clickfix-incident/06.png)
 
+### Stage 3: Defender tampering and payload delivery
+
 The third stage deletes all scheduled tasks, then attempts to register Microsoft Defender exclusions covering `%ProgramData%`, `%APPDATA%`, and `C:\` file paths, `powershell.exe`, `python.exe`, `pythonw.exe`, `regasm.exe`, and `svchost.exe` processes, and `.exe`, `.msi`, `.dll`, `.pyc`, and `.py` extensions. In the analysis environment, the commands errored out and were logged to the `elv_<GUID>.txt` file specified in the previous stage.
 
 Two payloads were retrieved from `cdnprog[.]b-cdn[.]net` and decoded with a subtract-key byte cipher with the literal string `Rfc2898DeriveBytes`, used as plain text rather than a key derivation class. The third stage downloads and starts the dropper (`W32Time.xpg`, stage 4) first, and then loads BoundSiphon (`St_vd.xpg`, stage 3b).
 
 ![Stage 3 script that adds Defender exclusions, drops the padded dropper, and loads BoundSiphon](/assets/images/analyzing-a-multi-stage-clickfix-incident/07.png)
 
+### Stage 3b: BoundSiphon infostealer
+
 BoundSiphon (`St_vd.xpg`) is a .NET Framework 4.8 assembly loaded reflectively through `Assembly::Load` and never touches the disk. It gates execution on an HTTP 418 response from its command and control server at `greatgrgreeng[.]com`, beacons host reconnaissance, then harvests Chromium and Firefox credentials, cookies, roughly 140 cryptocurrency wallets and wallet extensions, password manager extensions including 1Password, Bitwarden, and LastPass, and documents with `.txt`, `.doc`, and `.rtf` extensions from the Desktop, Documents, and Downloads folders.
 
 Firefox credentials are decrypted in process against the victim's own NSS libraries, so no database is copied out. BoundSiphon's app-bound encryption bypass does not attack the cipher. Rather, it relaunches the target browser with sandboxing disabled, rewrites the COM registration for the IElevator interface, injects a copy of itself into the browser process, and calls the elevation service from inside the browser's own security context so that path validation passes. The bypass targets Google Chrome, Microsoft Edge, Brave, and AVG Secure Browser. Both the legacy v10 and app-bound v20 keys are recovered and uploaded. Collected data is hex-encoded and exfiltrated over HTTP to `greatgrgreeng[.]com/upload`.
+
+### Stage 4: Dropper and Windows service
 
 The dropper (`W32Time.xpg`) is written to `C:\ProgramData\` under a filename of random digits, padded with null bytes to a random size between 751 and 800 megabytes so it exceeds sandbox and antivirus upload limits, launched with the argument `--loveputin`, and then deleted with `Remove-Item`. The deletion runs only after BoundSiphon finishes, by which time the dropper has likely installed its service and exited, so the `ProgramData` copy is likely removed. The copy that persists is the one the dropper installs as a service.
 
@@ -48,11 +58,15 @@ With `--loveputin`, the dropper copies itself, padding included, to `C:\Windows\
 
 When the service starts, it marks its own process as critical with `RtlSetProcessIsCritical` so terminating it crashes the system. The RemotePanel payload is stored in the `WatchDogService.Payload.EncryptedPayload` class as an AES-256-CBC encrypted array, with its key and initialization vector stored alongside it. The service decrypts the payload, takes the token of the user in the active console session, raises it to high integrity, and starts `regasm.exe` suspended in that user's session. It then hollows the payload into `regasm.exe` and resumes it. Every 1.5 to 4 seconds, the service checks whether `regasm.exe` is still running and repeats the injection if it is not. The stage 3 Defender exclusions include both of these processes, `svchost.exe` and `regasm.exe`.
 
+### RemotePanel RAT
+
 RemotePanel first checks environment variables for its command and control address (`GHOST_HOST` and `GHOST_PORT`, plus `GHOST_HVNC_PORT` for the hidden desktop channel, which defaults to 8443). When `GHOST_HOST` is not set, RemotePanel resolves its C2 server from the BNB Smart Chain instead, a technique otherwise known as EtherHiding. It sends an `eth_call` JSON-RPC request for function selector `0xb68d1809` on contract `0x2A8f205C8A6616a1D34C47F6172C16b20917253C` to the public `bsc-dataseed` RPC endpoints, parses the returned string as `host:port`, and repeats the lookup periodically. If the value has no port, RemotePanel uses TCP 443. The operator can change C2 servers by updating the contract without touching RemotePanel.
 
 On November 1st at 04:21 UTC (BNB Smart Chain block 130,984,071), the contract returned `193.233.75.7` with no port, so RemotePanel would connect to `193.233.75.7:443` over raw TCP without TLS. Blackpoint reported the same value in their analysis, so the C2 address has not changed for at least 39 days.
 
 Beyond the C2 channel, RemotePanel opens a remote PowerShell shell (`powershell.exe -NoLogo -NoExit -Command -`), captures the screen as JPEG images, and runs a hidden desktop module that the C2 server sends as a base64-encoded .NET assembly. The dropper's exception messages and console status messages are written in Russian, such as `[+] Служба установлена и запущена.` ("Service installed and started."). These strings are developer-facing artifacts rather than victim-facing text. However, language strings are easy to copy or plant and carry little attribution weight, particularly alongside the `--loveputin` argument. BoundSiphon also contains an `AntiSNG.CheckAndExitIfRussian` routine that exits when a Russian keyboard layout (1049) is present, but no code in the analyzed build calls it.
+
+### RemotePanel C2 protocol
 
 RemotePanel communication runs over raw TCP using a custom frame format that carries JSON packets. On connect, it generates a fresh AES-256 session key, assembles a hello payload containing a hardcoded shared secret, the host hardware identifier, the username, a build identifier, a Unix timestamp, and the base64-encoded session key, wraps that under an embedded RSA public key, and sends it as a `ClientHello`. The server replies with an acknowledgement, and if the client is not accepted RemotePanel terminates immediately.
 
