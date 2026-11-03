@@ -60,48 +60,92 @@ Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature 
 
 ### MITRE ATT&CK mapping
 
-| Tactic | Technique | ID | Behavior in the analyzed samples |
-| --- | --- | --- | --- |
-| Execution | User Execution: Malicious Copy and Paste | T1204.004 | The user pastes and runs the ClickFix command. |
-| Execution | Command and Scripting Interpreter: Windows Command Shell | T1059.003 | `cmd.exe` runs a `for /f` loop that executes each line that `finger.exe` returns. |
-| Execution | Command and Scripting Interpreter: PowerShell | T1059.001 | Stages 1 through 3 are PowerShell scripts run with `IEX` and `-EncodedCommand`, and RemotePanel provides a remote PowerShell shell. |
-| Execution | Native API | T1106 | Stage 2 defines P/Invoke wrappers for `CoInitializeEx` and `CoGetObject`, and the dropper calls `OpenSCManagerW`, `CreateServiceW`, and `StartService`. |
-| Execution | Inter-Process Communication: Component Object Model | T1559.001 | Stage 2 calls `ShellExec` on the CMSTPLUA COM object. |
-| Execution | System Services: Service Execution | T1569.002 | The dropper calls `StartService` on the `Windows Time` service it creates. |
-| Persistence | Create or Modify System Process: Windows Service | T1543.003 | The dropper installs an auto-start service named `Windows Time` that runs its hidden `svchost.exe` copy. |
-| Privilege Escalation | Abuse Elevation Control Mechanism: Bypass User Account Control | T1548.002 | Stage 2 uses the CMSTPLUA elevation moniker `{3E5FC7F9-9A51-4367-9063-A120244FBEC7}` to start an elevated `powershell.exe`. |
-| Privilege Escalation | Access Token Manipulation: Create Process with Token | T1134.002 | The service duplicates the console user's token with `WTSQueryUserToken` and `DuplicateTokenEx`, sets it to high integrity, and starts `regasm.exe` with `CreateProcessAsUserW`. |
-| Defense Evasion | Obfuscated Files or Information: Command Obfuscation | T1027.010 | The stage 0 command uses `^` caret escapes to break up `finger` and the user name. |
-| Defense Evasion | Impair Defenses: Disable or Modify Tools | T1562.001 | Stage 1 sets `amsiInitFailed`, and stage 3 adds Defender path, process, and extension exclusions. |
-| Defense Evasion | Reflective Code Loading | T1620 | Stage 3 loads BoundSiphon with `[Reflection.Assembly]::Load`, and RemotePanel loads its hidden desktop module the same way. |
-| Defense Evasion | Masquerading: Masquerade Task or Service | T1036.004 | The service is named `Windows Time` and copies the description of the legitimate `W32Time` service. |
-| Defense Evasion | Masquerading: Match Legitimate Resource Name or Location | T1036.005 | The service binary is named `svchost.exe` and sits in `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management\`. |
-| Defense Evasion | Hide Artifacts: Hidden Files and Directories | T1564.001 | The dropper sets the Hidden and System attributes on its `svchost.exe` copy. |
-| Defense Evasion, Privilege Escalation | Process Injection: Process Hollowing | T1055.012 | The service starts `regasm.exe` suspended, hollows RemotePanel into it, and repeats the injection if `regasm.exe` exits. |
-| Defense Evasion | Masquerading: Masquerade File Type | T1036.008 | Payloads use `.go`, `.png`, and `.xpg` extensions under a `/googleads/` path. |
-| Defense Evasion | Obfuscated Files or Information: Encrypted/Encoded File | T1027.013 | Stage 3 payloads are encoded with a subtract-key byte cipher, and RemotePanel is stored AES-256-CBC encrypted inside the dropper. |
-| Defense Evasion | Deobfuscate/Decode Files or Information | T1140 | Stage 3 decodes both payloads with the key `Rfc2898DeriveBytes`. |
-| Defense Evasion | Obfuscated Files or Information: Binary Padding | T1027.001 | Stage 3 pads the dropper with null bytes to 751–800 MB. |
-| Defense Evasion | Hide Artifacts: Hidden Window | T1564.003 | Stage 0 uses `start /min` and stage 2 uses `-WindowStyle Hidden`. RemotePanel's hidden desktop module is the closest fit to this technique. |
-| Defense Evasion | Indicator Removal: File Deletion | T1070.004 | Stage 2 deletes the `elv_*.txt` output file, stage 3 deletes the `ProgramData` copy of the dropper, and `--donbass` deletes the service binary. |
-| Defense Evasion | Execution Guardrails | T1480 | BoundSiphon runs only after its C2 server returns HTTP 418. |
-| Defense Evasion | Modify Registry | T1112 | BoundSiphon rewrites the `IElevator` interface and type library registration for Chrome, Edge, Brave, and AVG Secure Browser. |
-| Defense Evasion, Privilege Escalation | Process Injection | T1055 | BoundSiphon injects a copy of itself into the relaunched browser process. |
-| Discovery | System Owner/User Discovery | T1033 | Stage 2 `Test-Admin` checks the current token for the Administrators role. |
-| Discovery | System Information Discovery | T1082 | BoundSiphon beacons host reconnaissance to its C2 server. |
-| Credential Access | Credentials from Password Stores: Credentials from Web Browsers | T1555.003 | BoundSiphon decrypts Chromium and Firefox saved credentials, including app-bound v20 keys. |
-| Credential Access | Credentials from Password Stores: Password Managers | T1555.005 | BoundSiphon targets 1Password, Bitwarden, and LastPass extensions. |
-| Credential Access | Steal Web Session Cookie | T1539 | BoundSiphon collects browser cookies. |
-| Collection | Screen Capture | T1113 | RemotePanel captures the screen and sends JPEG images to the C2 server. |
-| Collection | Data from Local System | T1005 | BoundSiphon collects about 140 wallets and `.txt`, `.doc`, and `.rtf` files from Desktop, Documents, and Downloads. |
-| Command and Control | Ingress Tool Transfer | T1105 | `finger.exe` and `Net.WebClient` retrieve each stage. |
-| Command and Control | Application Layer Protocol: Web Protocols | T1071.001 | BoundSiphon uses HTTP for C2 and upload. |
-| Command and Control | Data Encoding: Standard Encoding | T1132.001 | BoundSiphon hex-encodes collected data. |
-| Command and Control | Web Service: Dead Drop Resolver | T1102.001 | Without `GHOST_HOST`, RemotePanel reads its C2 `host:port` from a BNB Smart Chain contract through public RPC endpoints. |
-| Command and Control | Non-Application Layer Protocol | T1095 | RemotePanel uses raw TCP with a custom frame format. |
-| Command and Control | Encrypted Channel: Asymmetric Cryptography | T1573.002 | RemotePanel wraps its `ClientHello` with an embedded RSA public key. |
-| Command and Control | Encrypted Channel: Symmetric Cryptography | T1573.001 | RemotePanel uses a per-session AES-256 key. |
-| Exfiltration | Exfiltration Over C2 Channel | T1041 | BoundSiphon uploads collected data over HTTP to `greatgrgreeng[.]com/upload`. |
+The following tables map the behavior in the analyzed samples to ATT&CK techniques, grouped by tactic.
+
+#### Execution
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Command and Scripting Interpreter: PowerShell | T1059.001 | Stages 1 through 3 are PowerShell scripts run with `IEX` and `-EncodedCommand`, and RemotePanel provides a remote PowerShell shell. |
+| Command and Scripting Interpreter: Windows Command Shell | T1059.003 | `cmd.exe` runs a `for /f` loop that executes each line that `finger.exe` returns. |
+| Native API | T1106 | Stage 2 defines P/Invoke wrappers for `CoInitializeEx` and `CoGetObject`, and the dropper calls `OpenSCManagerW`, `CreateServiceW`, and `StartService`. |
+| User Execution: Malicious Copy and Paste | T1204.004 | The user pastes and runs the ClickFix command. |
+| Inter-Process Communication: Component Object Model | T1559.001 | Stage 2 calls `ShellExec` on the CMSTPLUA COM object. |
+| System Services: Service Execution | T1569.002 | The dropper calls `StartService` on the `Windows Time` service it creates. |
+
+#### Persistence
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Create or Modify System Process: Windows Service | T1543.003 | The dropper installs an auto-start service named `Windows Time` that runs its hidden `svchost.exe` copy. |
+
+#### Privilege Escalation
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Access Token Manipulation: Create Process with Token | T1134.002 | The service duplicates the console user's token with `WTSQueryUserToken` and `DuplicateTokenEx`, sets it to high integrity, and starts `regasm.exe` with `CreateProcessAsUserW`. |
+| Abuse Elevation Control Mechanism: Bypass User Account Control | T1548.002 | Stage 2 uses the CMSTPLUA elevation moniker `{3E5FC7F9-9A51-4367-9063-A120244FBEC7}` to start an elevated `powershell.exe`. |
+
+#### Defense Evasion
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Obfuscated Files or Information: Binary Padding | T1027.001 | Stage 3 pads the dropper with null bytes to 751–800 MB. |
+| Obfuscated Files or Information: Command Obfuscation | T1027.010 | The stage 0 command uses `^` caret escapes to break up `finger` and the user name. |
+| Obfuscated Files or Information: Encrypted/Encoded File | T1027.013 | Stage 3 payloads are encoded with a subtract-key byte cipher, and RemotePanel is stored AES-256-CBC encrypted inside the dropper. |
+| Masquerading: Masquerade Task or Service | T1036.004 | The service is named `Windows Time` and copies the description of the legitimate `W32Time` service. |
+| Masquerading: Match Legitimate Resource Name or Location | T1036.005 | The service binary is named `svchost.exe` and sits in `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management\`. |
+| Masquerading: Masquerade File Type | T1036.008 | Payloads use `.go`, `.png`, and `.xpg` extensions under a `/googleads/` path. |
+| Process Injection (also Privilege Escalation) | T1055 | BoundSiphon injects a copy of itself into the relaunched browser process. |
+| Process Injection: Process Hollowing (also Privilege Escalation) | T1055.012 | The service starts `regasm.exe` suspended, hollows RemotePanel into it, and repeats the injection if `regasm.exe` exits. |
+| Indicator Removal: File Deletion | T1070.004 | Stage 2 deletes the `elv_*.txt` output file, stage 3 deletes the `ProgramData` copy of the dropper, and `--donbass` deletes the service binary. |
+| Modify Registry | T1112 | BoundSiphon rewrites the `IElevator` interface and type library registration for Chrome, Edge, Brave, and AVG Secure Browser. |
+| Deobfuscate/Decode Files or Information | T1140 | Stage 3 decodes both payloads with the key `Rfc2898DeriveBytes`. |
+| Execution Guardrails | T1480 | BoundSiphon runs only after its C2 server returns HTTP 418. |
+| Impair Defenses: Disable or Modify Tools | T1562.001 | Stage 1 sets `amsiInitFailed`, and stage 3 adds Defender path, process, and extension exclusions. |
+| Hide Artifacts: Hidden Files and Directories | T1564.001 | The dropper sets the Hidden and System attributes on its `svchost.exe` copy. |
+| Hide Artifacts: Hidden Window | T1564.003 | Stage 0 uses `start /min` and stage 2 uses `-WindowStyle Hidden`. RemotePanel's hidden desktop module is the closest fit to this technique. |
+| Reflective Code Loading | T1620 | Stage 3 loads BoundSiphon with `[Reflection.Assembly]::Load`, and RemotePanel loads its hidden desktop module the same way. |
+
+#### Credential Access
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Steal Web Session Cookie | T1539 | BoundSiphon collects browser cookies. |
+| Credentials from Password Stores: Credentials from Web Browsers | T1555.003 | BoundSiphon decrypts Chromium and Firefox saved credentials, including app-bound v20 keys. |
+| Credentials from Password Stores: Password Managers | T1555.005 | BoundSiphon targets 1Password, Bitwarden, and LastPass extensions. |
+
+#### Discovery
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| System Owner/User Discovery | T1033 | Stage 2 `Test-Admin` checks the current token for the Administrators role. |
+| System Information Discovery | T1082 | BoundSiphon beacons host reconnaissance to its C2 server. |
+
+#### Collection
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Data from Local System | T1005 | BoundSiphon collects about 140 wallets and `.txt`, `.doc`, and `.rtf` files from Desktop, Documents, and Downloads. |
+| Screen Capture | T1113 | RemotePanel captures the screen and sends JPEG images to the C2 server. |
+
+#### Command and Control
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Application Layer Protocol: Web Protocols | T1071.001 | BoundSiphon uses HTTP for C2 and upload. |
+| Non-Application Layer Protocol | T1095 | RemotePanel uses raw TCP with a custom frame format. |
+| Web Service: Dead Drop Resolver | T1102.001 | Without `GHOST_HOST`, RemotePanel reads its C2 `host:port` from a BNB Smart Chain contract through public RPC endpoints. |
+| Ingress Tool Transfer | T1105 | `finger.exe` and `Net.WebClient` retrieve each stage. |
+| Data Encoding: Standard Encoding | T1132.001 | BoundSiphon hex-encodes collected data. |
+| Encrypted Channel: Symmetric Cryptography | T1573.001 | RemotePanel uses a per-session AES-256 key. |
+| Encrypted Channel: Asymmetric Cryptography | T1573.002 | RemotePanel wraps its `ClientHello` with an embedded RSA public key. |
+
+#### Exfiltration
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Exfiltration Over C2 Channel | T1041 | BoundSiphon uploads collected data over HTTP to `greatgrgreeng[.]com/upload`. |
 
 ### Detection opportunities
 
