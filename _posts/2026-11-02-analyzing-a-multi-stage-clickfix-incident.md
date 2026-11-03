@@ -60,7 +60,7 @@ Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature 
 
 ### MITRE ATT&CK mapping
 
-The following tables map the behavior in the analyzed samples to ATT&CK techniques, grouped by tactic.
+The following tables map the behavior in the analyzed samples to techniques in ATT&CK v20, grouped by tactic.
 
 #### Execution
 
@@ -77,7 +77,7 @@ The following tables map the behavior in the analyzed samples to ATT&CK techniqu
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
-| Create or Modify System Process: Windows Service | T1543.003 | The dropper installs an auto-start service named `Windows Time` that runs its hidden `svchost.exe` copy. |
+| Create or Modify System Process: Windows Service (also Privilege Escalation) | T1543.003 | The dropper installs an auto-start service named `Windows Time` that runs its hidden `svchost.exe` copy. |
 
 #### Privilege Escalation
 
@@ -86,7 +86,7 @@ The following tables map the behavior in the analyzed samples to ATT&CK techniqu
 | Access Token Manipulation: Create Process with Token | T1134.002 | The service duplicates the console user's token with `WTSQueryUserToken` and `DuplicateTokenEx`, sets it to high integrity, and starts `regasm.exe` with `CreateProcessAsUserW`. |
 | Abuse Elevation Control Mechanism: Bypass User Account Control | T1548.002 | Stage 2 uses the CMSTPLUA elevation moniker `{3E5FC7F9-9A51-4367-9063-A120244FBEC7}` to start an elevated `powershell.exe`. |
 
-#### Defense Evasion
+#### Stealth
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
@@ -99,13 +99,18 @@ The following tables map the behavior in the analyzed samples to ATT&CK techniqu
 | Process Injection (also Privilege Escalation) | T1055 | BoundSiphon injects a copy of itself into the relaunched browser process. |
 | Process Injection: Process Hollowing (also Privilege Escalation) | T1055.012 | The service starts `regasm.exe` suspended, hollows RemotePanel into it, and repeats the injection if `regasm.exe` exits. |
 | Indicator Removal: File Deletion | T1070.004 | Stage 2 deletes the `elv_*.txt` output file, stage 3 deletes the `ProgramData` copy of the dropper, and `--donbass` deletes the service binary. |
-| Modify Registry | T1112 | BoundSiphon rewrites the `IElevator` interface and type library registration for Chrome, Edge, Brave, and AVG Secure Browser. |
 | Deobfuscate/Decode Files or Information | T1140 | Stage 3 decodes both payloads with the key `Rfc2898DeriveBytes`. |
 | Execution Guardrails | T1480 | BoundSiphon runs only after its C2 server returns HTTP 418. |
-| Impair Defenses: Disable or Modify Tools | T1562.001 | Stage 1 sets `amsiInitFailed`, and stage 3 adds Defender path, process, and extension exclusions. |
 | Hide Artifacts: Hidden Files and Directories | T1564.001 | The dropper sets the Hidden and System attributes on its `svchost.exe` copy. |
 | Hide Artifacts: Hidden Window | T1564.003 | Stage 0 uses `start /min` and stage 2 uses `-WindowStyle Hidden`. RemotePanel's hidden desktop module is the closest fit to this technique. |
 | Reflective Code Loading | T1620 | Stage 3 loads BoundSiphon with `[Reflection.Assembly]::Load`, and RemotePanel loads its hidden desktop module the same way. |
+
+#### Defense Impairment
+
+| Technique | ID | Behavior in the analyzed samples |
+| --- | --- | --- |
+| Modify Registry | T1112 | BoundSiphon rewrites the `IElevator` interface and type library registration for Chrome, Edge, Brave, and AVG Secure Browser. |
+| Disable or Modify Tools | T1685 | Stage 1 sets `amsiInitFailed`, and stage 3 adds Defender path, process, and extension exclusions. |
 
 #### Credential Access
 
