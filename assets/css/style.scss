@@ -18,7 +18,7 @@ $serif: 'Fraunces', Georgia, serif;
 $sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 $mono:  'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
 
-$measure: 42rem;
+$measure: 49rem;
 $radius: 3px;
 
 // ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ img { max-width: 100%; }
 // Layout shell
 // ---------------------------------------------------------------------------
 .wrap {
-  max-width: 46rem;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -281,11 +281,11 @@ img { max-width: 100%; }
 
   strong { color: $text; }
 
-  // Screenshots render as moderate-sized thumbnails, not edge-to-edge —
-  // click one to see it full size in the lightbox (assets/js/image-zoom.js).
+  // Screenshots span the text column. Click one to see it full size in the
+  // lightbox (assets/js/image-zoom.js).
   img {
     display: block;
-    max-width: min(100%, 36rem);
+    max-width: 100%;
     margin: 0 auto 1.5rem;
     border: 1px solid $hairline;
     border-radius: $radius;
@@ -381,7 +381,7 @@ img { max-width: 100%; }
 // Table of contents (assets/js/toc.js)
 //
 // Inline at the top of the post by default; pinned into the left margin once
-// the viewport is wide enough to hold it clear of the 46rem column. Entries
+// the viewport is wide enough to hold it clear of the 52rem column. Entries
 // sit dim and lift to full-strength text as their section is scrolled past.
 // ---------------------------------------------------------------------------
 .post-content .post-toc {
@@ -439,14 +439,14 @@ img { max-width: 100%; }
   ol ol ol > li > a { padding-left: 2.3rem; }
 }
 
-// 46rem column + a rail and gutters on each side.
-@media (min-width: 1240px) {
+// 52rem column + a rail and gutters on each side.
+@media (min-width: 1340px) {
   .post-content .post-toc {
     position: fixed;
     top: 40px;
-    right: calc(50% + 25.5rem);
+    right: calc(50% + 28.5rem);
     width: max-content;
-    max-width: min(15rem, calc(50% - 27rem));
+    max-width: min(15rem, calc(50% - 30rem));
     max-height: calc(100vh - 80px);
     overflow-y: auto;
     margin: 0;
