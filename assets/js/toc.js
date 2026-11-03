@@ -2,7 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var content = document.querySelector('.post-content');
   if (!content) return;
 
-  var headings = content.querySelectorAll('h2[id], h3[id], h4[id]');
+  // Section headings only. Subsections (h4) stay out of the rail so a long
+  // run of them, such as a post's detection queries, doesn't crowd it.
+  var headings = content.querySelectorAll('h2[id], h3[id]');
   if (headings.length < 2) return;
 
   var toc = document.createElement('nav');
@@ -49,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
   content.insertBefore(toc, headings[0]);
 
   var links = toc.querySelectorAll('a');
-  var items = toc.querySelectorAll('li');
 
   // The active entry is the last heading to have crossed ACTIVE_LINE. Measured
   // live rather than cached, because images load late and shift the headings.
@@ -74,13 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
     currentIndex = active;
     links.forEach(function (link, i) {
       link.classList.toggle('is-current', i === active);
-    });
-
-    // Nested entries stay collapsed until the reader is inside that branch,
-    // so a long run of subsections doesn't crowd out the rest of the rail.
-    var activeLink = links[active];
-    items.forEach(function (item) {
-      item.classList.toggle('is-open', !!activeLink && item.contains(activeLink));
     });
   }
 

@@ -9,7 +9,9 @@ Usage:
     scripts/publish.py "<note>" --commit --push
 
 What it does:
-  - Reads the note's frontmatter (title/tags) straight through.
+  - Reads the note's frontmatter (title/tags/description) straight through.
+    Without a description, uses the first sentence of the first prose
+    paragraph, skipping headings, images, quotes, tables, and code.
   - Rewrites Obsidian image embeds (![[img.png]], ![[img.png|alt]],
     ![[img.png|width]]) into standard markdown/HTML, renaming each copy
     sequentially (01.png, 02.png, ...) under assets/images/<slug>/ so
@@ -120,6 +122,25 @@ def strip_duplicate_title_heading(body, title):
     return body
 
 
+def first_sentence(body):
+    """First sentence of the first prose paragraph, as plain text.
+
+    Jekyll's default excerpt is the first block, which is a heading when a
+    post opens with one (e.g. "### Introduction"). That excerpt feeds the
+    index page, the meta description, and the RSS summary, so derive a
+    description from real prose instead.
+    """
+    for block in re.split(r"\n\s*\n", body):
+        block = block.strip()
+        if not block or block[0] in "#!>|<`-*" or block.startswith("---"):
+            continue
+        text = " ".join(block.split())
+        text = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", text)  # links and images
+        text = re.sub(r"[`*_]", "", text)
+        return re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", text, maxsplit=1)[0]
+    return ""
+
+
 def process_body(body, note_dir, vault_root, slug, warnings):
     body = COMMENT_RE.sub("", body)
     used_images = []
@@ -218,8 +239,11 @@ def main():
     warnings = []
     new_body, used_images = process_body(body, note_path.parent, vault_root, slug, warnings)
 
+    description = fields.get("description", "").strip().strip('"').strip("'") or first_sentence(new_body)
+    description_yaml = description.replace("\\", "\\\\").replace('"', '\\"')
+
     tags_yaml = "[" + ", ".join(tags) + "]"
-    frontmatter = f'---\ntitle: "{title}"\ntags: {tags_yaml}\n---\n'
+    frontmatter = f'---\ntitle: "{title}"\ndescription: "{description_yaml}"\ntags: {tags_yaml}\n---\n'
     final_content = frontmatter + "\n" + new_body.strip("\n") + "\n"
 
     print(f"Title:  {title}")

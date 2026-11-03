@@ -1,5 +1,6 @@
 ---
 title: "Analyzing a multi-stage ClickFix incident"
+description: "On September 17th, multiple EDR alerts were generated from a suspicious command execution event originating from a ClickFix prompt."
 tags: [ClickFix, infostealer, RAT]
 ---
 
