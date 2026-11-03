@@ -25,14 +25,14 @@ This payload attempts to bypass the Antimalware Scan Interface (AMSI) by setting
 
 The second stage is a PowerShell script disguised as a Go source file (`main.go`) under a `/googleads/` path on a Bunny CDN subdomain (`cdnprog[.]b-cdn[.]net`). It first checks whether the current process token has administrator rights before setting up privilege escalation through a CMSTPLUA COM object UAC bypass. This escalation doesn't turn a standard user into an administrator. Instead, it raises a member of the local Administrators group from the filtered, medium-integrity token that UAC assigns by default to the full, high-integrity token without showing a UAC prompt.
 
-![Stage 2 stage 3 download command and Test-Admin function](/assets/images/analyzing-a-multi-stage-clickfix-incident/03.png)
+![Stage 2 command that downloads stage 3, and the Test-Admin function](/assets/images/analyzing-a-multi-stage-clickfix-incident/03.png)
 ![Stage 2 Invoke-Cmstplua function defining P/Invoke wrappers for CoInitializeEx and CoGetObject](/assets/images/analyzing-a-multi-stage-clickfix-incident/04.png)
 
 Privilege escalation through the CMSTPLUA COM object is a well-documented technique, cataloged in the open-source UACMe project and used by many commodity malware families. CMSTPLUA (CLSID `{3E5FC7F9-9A51-4367-9063-A120244FBEC7}`) is a Windows COM class marked for auto-elevation, and its `ICMLuaUtil` interface (IID `{6EDD6D74-C007-4E75-B76A-E5740995E24C}`) exposes a `ShellExec` method. The script requests the object through the `Elevation:Administrator!new:` moniker with `CoGetObject`, then calls `ShellExec` at index 9 of the interface's function table to start an elevated `powershell.exe`. Windows grants the elevated object without a UAC prompt when the user belongs to the local Administrators group and UAC is not set to "Always notify." If the user is a standard account, the bypass fails.
 
 ![Stage 2 CoGetObject call with the CMSTPLUA elevation moniker and ShellExec at index 9](/assets/images/analyzing-a-multi-stage-clickfix-incident/05.png)
 
-If the session is not already elevated, the third stage is then retrieved and executed in a privileged context with the CMSTPLUA UAC bypass. Its output is saved to `%TEMP%\elv_<GUID>.txt`, which the second stage reads and then deletes.
+If the session is not already elevated, the third stage is retrieved and executed in a privileged context with the CMSTPLUA UAC bypass. Its output is saved to `%TEMP%\elv_<GUID>.txt`, which the second stage reads and then deletes.
 
 ![Stage 2 logic that runs stage 3 through the UAC bypass and reads the elv_ output file](/assets/images/analyzing-a-multi-stage-clickfix-incident/06.png)
 
@@ -64,13 +64,17 @@ RemotePanel first checks environment variables for its command and control addre
 
 On November 1st at 04:21 UTC (BNB Smart Chain block 130,984,071), the contract returned `193.233.75.7` with no port, so RemotePanel would connect to `193.233.75.7:443` over raw TCP without TLS. Blackpoint reported the same value in their analysis, so the C2 address has not changed for at least 39 days.
 
-Beyond the C2 channel, RemotePanel opens a remote PowerShell shell (`powershell.exe -NoLogo -NoExit -Command -`), captures the screen as JPEG images, and runs a hidden desktop module that the C2 server sends as a base64-encoded .NET assembly. The dropper's exception messages and console status messages are written in Russian, such as `[+] Служба установлена и запущена.` ("Service installed and started."). These strings are developer-facing artifacts rather than victim-facing text. However, language strings are easy to copy or plant and carry little attribution weight, particularly alongside the `--loveputin` argument. BoundSiphon also contains an `AntiSNG.CheckAndExitIfRussian` routine that exits when a Russian keyboard layout (1049) is present, but no code in the analyzed build calls it.
+Beyond the C2 channel, RemotePanel opens a remote PowerShell shell (`powershell.exe -NoLogo -NoExit -Command -`), captures the screen as JPEG images, and runs a hidden desktop module that the C2 server sends as a base64-encoded .NET assembly.
 
 ### RemotePanel C2 protocol
 
 RemotePanel communication runs over raw TCP using a custom frame format that carries JSON packets. On connect, it generates a fresh AES-256 session key, assembles a hello payload containing a hardcoded shared secret, the host hardware identifier, the username, a build identifier, a Unix timestamp, and the base64-encoded session key, wraps that under an embedded RSA public key, and sends it as a `ClientHello`. The server replies with an acknowledgement, and if the client is not accepted RemotePanel terminates immediately.
 
 Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature or any URLs for proxy logs. That leaves two durable pivots: the embedded RSA public key modulus, which survives recompilation, renaming, and infrastructure rotation, and the smart contract address, which stays fixed while the operator rotates C2 servers.
+
+### Language artifacts
+
+The dropper's exception messages and console status messages are written in Russian, such as `[+] Служба установлена и запущена.` ("Service installed and started."). These strings are developer-facing artifacts rather than victim-facing text. However, language strings are easy to copy or plant and carry little attribution weight, particularly alongside the `--loveputin` argument. BoundSiphon also contains an `AntiSNG.CheckAndExitIfRussian` routine that exits when a Russian keyboard layout (1049) is present, but no code in the analyzed build calls it.
 
 ### MITRE ATT&CK mapping
 
