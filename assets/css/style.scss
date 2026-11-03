@@ -451,11 +451,8 @@ img { max-width: 100%; }
     overflow-y: auto;
     margin: 0;
 
-    a {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    // Long titles wrap instead of truncating, so every entry reads in full.
+    a { overflow-wrap: anywhere; }
   }
 }
 

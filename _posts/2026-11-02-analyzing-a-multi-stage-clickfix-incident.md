@@ -60,9 +60,7 @@ Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature 
 
 ### MITRE ATT&CK mapping
 
-The following tables map the behavior in the analyzed samples to techniques in ATT&CK v20, grouped by tactic.
-
-#### Execution
+**Execution**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
@@ -73,20 +71,20 @@ The following tables map the behavior in the analyzed samples to techniques in A
 | Inter-Process Communication: Component Object Model | T1559.001 | Stage 2 calls `ShellExec` on the CMSTPLUA COM object. |
 | System Services: Service Execution | T1569.002 | The dropper calls `StartService` on the `Windows Time` service it creates. |
 
-#### Persistence
+**Persistence**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
 | Create or Modify System Process: Windows Service (also Privilege Escalation) | T1543.003 | The dropper installs an auto-start service named `Windows Time` that runs its hidden `svchost.exe` copy. |
 
-#### Privilege Escalation
+**Privilege Escalation**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
 | Access Token Manipulation: Create Process with Token | T1134.002 | The service duplicates the console user's token with `WTSQueryUserToken` and `DuplicateTokenEx`, sets it to high integrity, and starts `regasm.exe` with `CreateProcessAsUserW`. |
 | Abuse Elevation Control Mechanism: Bypass User Account Control | T1548.002 | Stage 2 uses the CMSTPLUA elevation moniker `{3E5FC7F9-9A51-4367-9063-A120244FBEC7}` to start an elevated `powershell.exe`. |
 
-#### Stealth
+**Stealth**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
@@ -105,14 +103,14 @@ The following tables map the behavior in the analyzed samples to techniques in A
 | Hide Artifacts: Hidden Window | T1564.003 | Stage 0 uses `start /min` and stage 2 uses `-WindowStyle Hidden`. RemotePanel's hidden desktop module is the closest fit to this technique. |
 | Reflective Code Loading | T1620 | Stage 3 loads BoundSiphon with `[Reflection.Assembly]::Load`, and RemotePanel loads its hidden desktop module the same way. |
 
-#### Defense Impairment
+**Defense Impairment**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
 | Modify Registry | T1112 | BoundSiphon rewrites the `IElevator` interface and type library registration for Chrome, Edge, Brave, and AVG Secure Browser. |
 | Disable or Modify Tools | T1685 | Stage 1 sets `amsiInitFailed`, and stage 3 adds Defender path, process, and extension exclusions. |
 
-#### Credential Access
+**Credential Access**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
@@ -120,21 +118,21 @@ The following tables map the behavior in the analyzed samples to techniques in A
 | Credentials from Password Stores: Credentials from Web Browsers | T1555.003 | BoundSiphon decrypts Chromium and Firefox saved credentials, including app-bound v20 keys. |
 | Credentials from Password Stores: Password Managers | T1555.005 | BoundSiphon targets 1Password, Bitwarden, and LastPass extensions. |
 
-#### Discovery
+**Discovery**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
 | System Owner/User Discovery | T1033 | Stage 2 `Test-Admin` checks the current token for the Administrators role. |
 | System Information Discovery | T1082 | BoundSiphon beacons host reconnaissance to its C2 server. |
 
-#### Collection
+**Collection**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
 | Data from Local System | T1005 | BoundSiphon collects about 140 wallets and `.txt`, `.doc`, and `.rtf` files from Desktop, Documents, and Downloads. |
 | Screen Capture | T1113 | RemotePanel captures the screen and sends JPEG images to the C2 server. |
 
-#### Command and Control
+**Command and Control**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |
@@ -146,7 +144,7 @@ The following tables map the behavior in the analyzed samples to techniques in A
 | Encrypted Channel: Symmetric Cryptography | T1573.001 | RemotePanel uses a per-session AES-256 key. |
 | Encrypted Channel: Asymmetric Cryptography | T1573.002 | RemotePanel wraps its `ClientHello` with an embedded RSA public key. |
 
-#### Exfiltration
+**Exfiltration**
 
 | Technique | ID | Behavior in the analyzed samples |
 | --- | --- | --- |

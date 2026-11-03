@@ -36,8 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var link = document.createElement('a');
     link.href = '#' + heading.id;
     link.textContent = heading.textContent.trim();
-    // Pinned entries are clamped to one line, so keep the full text reachable.
-    link.title = link.textContent;
     item.appendChild(link);
     parent.list.appendChild(item);
 
