@@ -497,8 +497,14 @@ img { max-width: 100%; }
   }
 }
 
+// Same button on code blocks. The wrapper doesn't scroll, so the button
+// stays in the corner while the <pre> inside it scrolls sideways.
+.code-wrap { position: relative; }
+
 .table-wrap:hover .table-copy-btn,
-.table-wrap:focus-within .table-copy-btn {
+.table-wrap:focus-within .table-copy-btn,
+.code-wrap:hover .table-copy-btn,
+.code-wrap:focus-within .table-copy-btn {
   opacity: 1;
 }
 
