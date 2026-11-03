@@ -3,6 +3,8 @@ title: "Analyzing a multi-stage ClickFix incident"
 tags: [ClickFix, infostealer, RAT]
 ---
 
+### Introduction
+
 On September 17th, multiple EDR alerts were generated from a suspicious command execution event originating from a ClickFix prompt. Although the malware payloads never ran on the affected host, retrieving and analyzing each stage uncovered a multi-stage malware chain consisting of several PowerShell scripts and executable files that, had it succeeded, would have delivered the BoundSiphon infostealer and the RemotePanel remote access trojan (RAT).
 
 BoundSiphon pilfers saved browser passwords, session cookies, cryptocurrency wallets, and documents, and it defeats Google Chrome's app-bound encryption protection. RemotePanel is injected into a legitimate .NET process by a Windows service and provides hands-on remote control of the host, including a remote PowerShell shell, screen capture, and a hidden desktop (HVNC) module that lets an operator use the infected machine while a legitimate user is logged in.
