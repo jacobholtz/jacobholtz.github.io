@@ -7,7 +7,7 @@ On September 17th, multiple EDR alerts were generated from a suspicious command 
 
 BoundSiphon pilfers saved browser passwords, session cookies, cryptocurrency wallets, and documents, and it defeats Google Chrome's app-bound encryption protection. RemotePanel is injected into a legitimate .NET process by a Windows service and provides hands-on remote control of the host, including a remote PowerShell shell, screen capture, and a hidden desktop (HVNC) module that lets an operator use the infected machine while a legitimate user is logged in.
 
-The operator behind the activity is currently unidentified. Blackpoint Cyber's Adversary Pursuit Group published an analysis of the same toolkit on September 23rd that names the infostealer BoundSiphon and the RAT RemotePanel ([RemotePanel and BoundSiphon: A Dual-Payload Toolkit for Persistent Access and Browser Theft](https://blackpointcyber.com/blog/remotepanel-and-boundsiphon-a-dual-payload-toolkit-for-persistent-access-and-browser-theft/)). The hashes, domains, finger query, service binary path, and blockchain contract in this writeup match that report, which confirms that the observed payloads are BoundSiphon and RemotePanel.
+The operator behind the activity is unidentified. Blackpoint Cyber's Adversary Pursuit Group published an analysis of the same toolkit on September 23rd that names the infostealer BoundSiphon and the RAT RemotePanel ([RemotePanel and BoundSiphon: A Dual-Payload Toolkit for Persistent Access and Browser Theft](https://blackpointcyber.com/blog/remotepanel-and-boundsiphon-a-dual-payload-toolkit-for-persistent-access-and-browser-theft/)). The hashes, domains, finger query, service binary path, and blockchain contract in this writeup match that report, which confirms that the observed payloads are BoundSiphon and RemotePanel.
 
 Execution begins when the malicious copy-and-pasted command retrieves the first PowerShell stage with `finger.exe`.
 
@@ -38,9 +38,9 @@ Two payloads were retrieved from `cdnprog[.]b-cdn[.]net` and decoded with a subt
 
 ![Stage 3 script that adds Defender exclusions, drops the padded dropper, and loads BoundSiphon](/assets/images/analyzing-a-multi-stage-clickfix-incident/07.png)
 
-BoundSiphon (`St_vd.xpg`) is a .NET Framework 4.8 assembly loaded reflectively through `Assembly::Load` and never touches the disk. It gates execution on an HTTP 418 response from its command and control server at `greatgrgreeng[.]com`, beacons host reconnaissance, then harvests Chromium and Firefox credentials, cookies, roughly 120 cryptocurrency wallets and wallet extensions, password manager extensions including 1Password, Bitwarden, and LastPass, and documents with `.txt`, `.doc`, and `.rtf` extensions from the Desktop, Documents, and Downloads folders.
+BoundSiphon (`St_vd.xpg`) is a .NET Framework 4.8 assembly loaded reflectively through `Assembly::Load` and never touches the disk. It gates execution on an HTTP 418 response from its command and control server at `greatgrgreeng[.]com`, beacons host reconnaissance, then harvests Chromium and Firefox credentials, cookies, roughly 140 cryptocurrency wallets and wallet extensions, password manager extensions including 1Password, Bitwarden, and LastPass, and documents with `.txt`, `.doc`, and `.rtf` extensions from the Desktop, Documents, and Downloads folders.
 
-Firefox credentials are decrypted in process against the victim's own NSS libraries, so no database is copied out. BoundSiphon's app-bound encryption bypass does not attack the cipher. Rather, it relaunches the target browser with sandboxing disabled, rewrites the COM registration for the IElevator interface, injects a copy of itself into the browser process, and calls the elevation service from inside the browser's own security context so that path validation passes. The bypass targets Google Chrome, Microsoft Edge, Brave, and AVG Secure Browser. Both the legacy v10 and app-bound v20 keys are recovered and uploaded. Collected data is hex-encoded and exfiltrated over HTTP to `greatgrgreeng[.]com/upload` on numbered channels that separate keys, recon, credentials, archives, and documents.
+Firefox credentials are decrypted in process against the victim's own NSS libraries, so no database is copied out. BoundSiphon's app-bound encryption bypass does not attack the cipher. Rather, it relaunches the target browser with sandboxing disabled, rewrites the COM registration for the IElevator interface, injects a copy of itself into the browser process, and calls the elevation service from inside the browser's own security context so that path validation passes. The bypass targets Google Chrome, Microsoft Edge, Brave, and AVG Secure Browser. Both the legacy v10 and app-bound v20 keys are recovered and uploaded. Collected data is hex-encoded and exfiltrated over HTTP to `greatgrgreeng[.]com/upload`.
 
 The dropper (`W32Time.xpg`) is written to `C:\ProgramData\` under a filename of random digits, padded with null bytes to a random size between 751 and 800 megabytes so it exceeds sandbox and antivirus upload limits, launched with the argument `--loveputin`, and then deleted with `Remove-Item`. The deletion runs only after BoundSiphon finishes, by which time the dropper has likely installed its service and exited, so the `ProgramData` copy is likely removed. The copy that persists is the one the dropper installs as a service.
 
@@ -93,7 +93,7 @@ Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature 
 | Credential Access | Credentials from Password Stores: Password Managers | T1555.005 | BoundSiphon targets 1Password, Bitwarden, and LastPass extensions. |
 | Credential Access | Steal Web Session Cookie | T1539 | BoundSiphon collects browser cookies. |
 | Collection | Screen Capture | T1113 | RemotePanel captures the screen and sends JPEG images to the C2 server. |
-| Collection | Data from Local System | T1005 | BoundSiphon collects about 120 wallets and `.txt`, `.doc`, and `.rtf` files from Desktop, Documents, and Downloads. |
+| Collection | Data from Local System | T1005 | BoundSiphon collects about 140 wallets and `.txt`, `.doc`, and `.rtf` files from Desktop, Documents, and Downloads. |
 | Command and Control | Ingress Tool Transfer | T1105 | `finger.exe` and `Net.WebClient` retrieve each stage. |
 | Command and Control | Application Layer Protocol: Web Protocols | T1071.001 | BoundSiphon uses HTTP for C2 and upload. |
 | Command and Control | Data Encoding: Standard Encoding | T1132.001 | BoundSiphon hex-encodes collected data. |
@@ -101,7 +101,7 @@ Because the channel does not use TLS, it doesn't produce a JA3 or JA4 signature 
 | Command and Control | Non-Application Layer Protocol | T1095 | RemotePanel uses raw TCP with a custom frame format. |
 | Command and Control | Encrypted Channel: Asymmetric Cryptography | T1573.002 | RemotePanel wraps its `ClientHello` with an embedded RSA public key. |
 | Command and Control | Encrypted Channel: Symmetric Cryptography | T1573.001 | RemotePanel uses a per-session AES-256 key. |
-| Exfiltration | Exfiltration Over C2 Channel | T1041 | BoundSiphon uploads data on numbered HTTP channels. |
+| Exfiltration | Exfiltration Over C2 Channel | T1041 | BoundSiphon uploads collected data over HTTP to `greatgrgreeng[.]com/upload`. |
 
 ### Detection opportunities
 
@@ -328,7 +328,7 @@ DeviceRegistryEvents
 #### Network detections outside Defender
 
 - Search for HTTP status `418` responses. Legitimate servers rarely return this status, and BoundSiphon requires it before it runs.
-- Search for request bodies that are long hexadecimal strings sent to the same host on sequential numeric paths or parameters.
+- Search for request bodies that are long hexadecimal strings sent to the same host.
 - Search for HTTP traffic to `greatgrgreeng[.]com/check` and `greatgrgreeng[.]com/upload`.
 - Search for `eth_call` request bodies that contain the contract address `0x2A8f205C8A6616a1D34C47F6172C16b20917253C`.
 - For RemotePanel, use the YARA rule on the embedded RSA public key in the next section. The key survives recompilation and infrastructure changes. It does not cross the network, because RemotePanel only uses the key to encrypt the `ClientHello`, so network sensors cannot match it.
